@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Experiment</string>
+    <string name="accessibility_description">P_L_A_C_E_H_O_L_D_E_R</string>
+    <string name="admin_label">label</string>
+    <string name="admin_description">description</string>
+    <string name="launcher_label">Launcher label</string>
+    <string name="pastebin_text">>Do you want to play a game?[Y/N]:</string>
+    <string name="say_me_what_is_matter">>Say me what is matter</string>
+    <string name="android_or_ios">Android - 1, iOS - 2: </string>
+    <string name="io_or_wwdc">Google I/O - 1, Apple WWDC - 2: </string>
+    <string name="enum_or_intdef">Enum - 1, @IntDef - 2: </string>
+    <string name="you_are_goddamn_right">>You\'re goddamn right</string>
+    <string name="press_enter_to_continue">>Press any key to continue…</string>
+</resources>
