@@ -5,12 +5,14 @@ import adambl4.experiment.challenge.utils.extensions.TRAVERSAL_PARENTS
 import adambl4.experiment.challenge.utils.extensions.rectInScreen
 import adambl4.experiment.challenge.utils.extensions.unitDeferred
 import adambl4.experiment.challenge.utils.extensions.unwrapAndThen
+import adambl4.experiment.challenge.utils.td
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.PixelFormat
 import android.graphics.Rect
 import android.os.Handler
+import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.view.Gravity
 import android.view.MotionEvent
@@ -18,6 +20,7 @@ import android.view.View
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.FrameLayout
+import android.widget.LinearLayout
 import nl.komponents.kovenant.*
 import org.jetbrains.anko.*
 import java.util.*
@@ -127,32 +130,16 @@ class RippleView(context: Context) : SystemAlertView(context) {
     init {
         isClickable = true
         foreground = resources.getDrawable(R.drawable.transparent_ripple_like_in_settings_app)
-        backgroundColor = resources.getColor(android.R.color.holo_red_dark)
+
+        //backgroundColor = resources.getColor(android.R.color.holo_red_dark)
     }
 }
 
 
-class CameraAlertDialogOverlay(context: Context) : SystemAlertView(context) {
-    val FADE_IN_DURATION = 1000L
 
-    init {
-        alpha = 0f
-        backgroundResource = android.R.color.black
-    }
+class AirplanChallengeView(context: Context, val pointerCallback: (Int, MotionEvent) -> Unit, val hareClickCallback: () -> Unit) : SystemAlertView(context) {
+    val MotionEvent.currentId: Int get() = getPointerId(actionIndex)
 
-
-    override fun show(): Promise<Unit, Exception> {
-        val deferred = deferred<Unit, Exception>()
-        super.show() then {
-            animate().alpha(1f).setDuration(FADE_IN_DURATION).withEndAction { deferred.resolve(Unit) }.start()
-        }
-        return deferred.promise
-    }
-}
-
-val MotionEvent.currentId: Int get() = getPointerId(actionIndex)
-
-class AirplanChallengeView(context: Context) : SystemAlertView(context) {
     val listOfRect = mutableListOf<Rect>()
     val isRectPressed = mutableListOf<Boolean>()
     val rectPaintPressed = Paint()
@@ -165,19 +152,33 @@ class AirplanChallengeView(context: Context) : SystemAlertView(context) {
         val randomX = random.nextInt(height)
         val randomY = random.nextInt(width)
 
-        hareRect = Rect(0, 0, 500, 500)
+        hareRect = Rect(0, 0, 100, 100)
 
         (hareRect as Rect).offsetTo(randomX, randomY)
         invalidate()
 
-        hhandler.postDelayed(hideRunnale, 920)
+        hhandler.postDelayed(hideRunnable, random.nextInt(500).toLong())
     }
 
-    val hideRunnale = Runnable {
+    val hideRunnable = Runnable {
         hareRect = null;
         invalidate()
         startHareCoursing()
     }
+
+    private fun startHareCoursing() {
+        hhandler.postDelayed(showRunnable, random.nextInt(1000).toLong())
+    }
+
+    private fun stopHareCoursing() {
+        td { "STOP HARE COURSING" }
+        if (hareRect != null) {
+            hhandler.removeCallbacksAndMessages(null)
+            hareRect = null;
+            invalidate()
+        }
+    }
+
 
     init {
         foreground = resources.getDrawable(R.drawable.transparent_ripple_like_in_settings_app)
@@ -194,14 +195,15 @@ class AirplanChallengeView(context: Context) : SystemAlertView(context) {
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         if (event == null) return super.onTouchEvent(event)
 
-
         if (event.action and MotionEvent.ACTION_MASK == MotionEvent.ACTION_DOWN || event.action and MotionEvent.ACTION_MASK == MotionEvent.ACTION_POINTER_DOWN) {
             if (hareRect != null) {
                 if ((hareRect as Rect).contains(event.getX(event.pointerCount - 1).toInt(), event.getY(event.pointerCount - 1).toInt())) {
-                    Log.d("tag", "OOOOOOOOOOOPPPPPPP");
+                    hareRect = null
+                    invalidate()
+                    hareClickCallback()
+
                 }
             }
-
         }
 
         if (event.currentId > listOfRect.size - 1 || event.currentId >= event.pointerCount || event.pointerCount > listOfRect.size) return false
@@ -218,6 +220,7 @@ class AirplanChallengeView(context: Context) : SystemAlertView(context) {
                 if (listOfRect[event.currentId].contains(event.getX(event.currentId).toInt(), event.getY(event.currentId).toInt())) {
                     isRectPressed[event.currentId] = true
                     invalidate()
+                    pointerCallback(event.currentId, event)
                 }
             }
 
@@ -238,28 +241,19 @@ class AirplanChallengeView(context: Context) : SystemAlertView(context) {
             MotionEvent.ACTION_POINTER_UP, MotionEvent.ACTION_UP -> {
                 isRectPressed[event.currentId] = false
                 invalidate()
+                pointerCallback(event.currentId, event)
             }
         }
 
         if (event.action and MotionEvent.ACTION_MASK == MotionEvent.ACTION_POINTER_DOWN && event.pointerCount == listOfRect.size) startHareCoursing()
-        if (event.action and MotionEvent.ACTION_MASK == MotionEvent.ACTION_POINTER_UP && hareRect != null) stopHareCoursing()
+        if (event.action and MotionEvent.ACTION_MASK == MotionEvent.ACTION_POINTER_UP
+                || event.action and MotionEvent.ACTION_MASK == MotionEvent.ACTION_UP && hareRect != null) stopHareCoursing()
 
 
         return super.onTouchEvent(event)
     }
 
-    private fun startHareCoursing() {
-        hhandler.postDelayed(showRunnable, random.nextInt(1000).toLong())
-    }
 
-
-    private fun stopHareCoursing() {
-        if (hareRect != null) {
-            hhandler.removeCallbacksAndMessages(null)
-            hareRect = null;
-            invalidate()
-        }
-    }
 
     fun addRect(rect: Rect) {
         rect.inset(-1, -1)
@@ -296,7 +290,7 @@ fun SystemAlertView.followNode(node: AccessibilityNodeInfo, freshNodeProvider: (
             }
             fitParamsToRect(nodeToFollow.rectInScreen(), params)
             if (params.width > 0 && params.height > 0) {
-                if (!isAttachedToWindow){
+                if (!isAttachedToWindow) {
                     show()
                 } else {
                     updateLayoutParams(params)
@@ -328,12 +322,63 @@ fun SystemAlertView.followNode(node: AccessibilityNodeInfo, freshNodeProvider: (
 }
 
 
-fun SystemAlertView.showOver(rect : Rect): Promise<Unit, Exception> {
+class HelpView(context: Context, helpText: String) : SystemAlertView(context) {
+    val duration = 2000L
+
+    init {
+        alpha = 0f
+        params.gravity = Gravity.BOTTOM
+        params.height = dip(300)
+        linearLayout {
+            gravity = Gravity.CENTER or Gravity.BOTTOM
+            orientation = LinearLayout.VERTICAL
+            leftPadding = dip(50)
+            rightPadding = dip(50)
+            textView(helpText) {
+                textColor = resources.getColor(android.R.color.black)
+                backgroundDrawable = resources.getDrawable(R.drawable.bubble)
+                gravity = Gravity.CENTER
+                maxLines = 6
+                scrollBarStyle = View.SCROLLBARS_INSIDE_OVERLAY
+                movementMethod = ScrollingMovementMethod()
+            }
+            frameLayout {
+                imageView {
+                    image = resources.getDrawable(R.drawable.android_half)
+                }
+                button("Got it") {
+                    onClick { hide() }
+                }.lparams() {
+                    gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
+                }
+            }
+        }
+    }
+
+    override fun show(): Promise<Unit, Exception> =
+            super.show().then() {
+                val deferred = unitDeferred()
+                animate().alpha(1f).setDuration(duration / 3 * 2).withEndAction { deferred.resolve(Unit) }.start()
+                deferred.promise
+            }.unwrap()
+
+    override fun hide(): Promise<Unit, Exception> =
+            task {
+                val deferred = unitDeferred()
+                animate().alpha(0f).setDuration(duration / 3 * 1).withEndAction { deferred.resolve(Unit) }.start()
+                deferred.promise
+            }.unwrapAndThen() { super.hide() }.unwrap()
+
+
+}
+
+
+fun SystemAlertView.showOver(rect: Rect): Promise<Unit, Exception> {
     fitParamsToRect(rect, params)
     return show()
 }
 
-fun fitParamsToRect(rect : Rect, params: WindowManager.LayoutParams) {
+fun fitParamsToRect(rect: Rect, params: WindowManager.LayoutParams) {
     params.width = rect.width()
     params.height = rect.height()
     params.x = rect.left

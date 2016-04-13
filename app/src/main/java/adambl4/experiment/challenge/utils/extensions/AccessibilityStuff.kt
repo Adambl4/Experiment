@@ -1,10 +1,9 @@
 package adambl4.experiment.challenge.utils.extensions
 
-import adambl4.experiment.challenge.GameConfig
+import adambl4.experiment.challenge.TheGame.GameConfig
 import android.content.Context
 import android.graphics.Rect
 import android.os.Bundle
-import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import nl.komponents.kovenant.Promise
@@ -215,7 +214,7 @@ fun AccessibilityNodeInfo.rectInScreen(): Rect {
 fun accessibilityEvents(context: Context = GameConfig.context): Observable<AccessibilityEvent> =
         context.accessibilityEventStream
 
-fun waitEvent(eventPredicate: (AccessibilityEvent) -> Boolean, context: Context = GameConfig.context): Promise<AccessibilityEvent, Exception> {
+fun waitAccessibilityEvent(eventPredicate: (AccessibilityEvent) -> Boolean, context: Context = GameConfig.context): Promise<AccessibilityEvent, Exception> {
     val deferred = deferred<AccessibilityEvent, Exception>()
     val subscription = context.accessibilityEventStream
             .filter { eventPredicate(it) }

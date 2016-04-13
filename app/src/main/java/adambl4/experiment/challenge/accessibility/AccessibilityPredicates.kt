@@ -1,7 +1,7 @@
 package adambl4.experiment.challenge.accessibility
 
-import adambl4.experiment.challenge.GameConfig
 import adambl4.experiment.challenge.R
+import adambl4.experiment.challenge.TheGame
 import adambl4.experiment.challenge.utils.SettingsStrings
 import adambl4.experiment.challenge.utils.extensions.TRAVERSAL_FORWARD
 import android.view.accessibility.AccessibilityEvent
@@ -19,6 +19,7 @@ fun eventPredicate(callback: AccessibilityEvent.() -> Boolean): (AccessibilityEv
 fun nodePredicate(callback: AccessibilityNodeInfo.() -> Boolean): (AccessibilityNodeInfo) -> Boolean = { callback(it) }
 
 fun eventWithText(text: String) = eventPredicate() { source?.findAccessibilityNodeInfosByText(text)?.isNotEmpty() ?: false }
+fun eventWithId(id: String) = eventPredicate() { source?.findAccessibilityNodeInfosByViewId(id)?.isNotEmpty() ?: false }
 fun eventWithPackage(packagee: String) = eventPredicate() { source?.packageName == packageName ?: false }
 
 //shit
@@ -87,7 +88,7 @@ val HOME_SCREEN_OPENED: (AccessibilityEvent) -> Boolean =
                 eventActivityOpening("com.android.settings.Settings\$HomeSettingsActivity"),
                 and(
                         SUB_SETTINGS_OPENED,
-                        eventWithText(GameConfig.context.getString(R.string.launcher_label))
+                        eventWithText(TheGame.GameConfig.context.getString(R.string.launcher_label))
                 )
         )
 
@@ -103,7 +104,7 @@ val SOUND_SCREEN_OPENED: (AccessibilityEvent) -> Boolean =
 val ACCESSIBILITY_SERVICE_SCREEN_OPENED: (AccessibilityEvent) -> Boolean =
         and(
                 SUB_SETTINGS_OPENED,
-                eventWithText(GameConfig.context.getString(R.string.accessibility_description))
+                eventWithText(TheGame.GameConfig.context.getString(R.string.accessibility_description))
         )
 
 val WIFI_SCREEN_OEPENED: (AccessibilityEvent) -> Boolean =
@@ -132,17 +133,13 @@ val SETTINGS_SCREEN_OPENED: (AccessibilityEvent) -> Boolean =
                 eventWithText(SettingsStrings.SETTINGS)
         )
 
-val PASTEBIN_ANSWER_YES_EVENT: (AccessibilityEvent) -> Boolean = and(
-        eventWithType(AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED),
-        eventWithClassName("android.widget.EditText"),
-        or(
-                //TODO this is shit
-                eventWithDescription(GameConfig.context.getString(R.string.pastebin_text) + "Y"),
-                eventWithDescription(GameConfig.context.getString(R.string.pastebin_text) + " Y"),
-                eventWithDescription(GameConfig.context.getString(R.string.pastebin_text) + "y"),
-                eventWithDescription(GameConfig.context.getString(R.string.pastebin_text) + " y")
+val APP_INFO_SCREEN_OPENED: (AccessibilityEvent) -> Boolean =
+        and(
+                SUB_SETTINGS_OPENED,
+                eventWithText(SettingsStrings.APP_INFO),
+                eventWithText(TheGame.GameConfig.context.getString(R.string.app_name))
         )
-)
+
 
 val CAMERA_DISABLED_EVENT: (AccessibilityEvent) -> Boolean =
         and(

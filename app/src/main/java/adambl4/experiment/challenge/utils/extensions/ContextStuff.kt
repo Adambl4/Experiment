@@ -7,6 +7,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
 import android.util.Log
+import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
@@ -63,6 +64,9 @@ val Context.navigationBarUI: AccessibilityNodeInfo?
 
 val Context.accessibilityEventStream: Observable<AccessibilityEvent>
     get() = getChallengeApplication().controller.eventBus
+
+val Context.keyEventStream: Observable<KeyEvent>
+    get() = getChallengeApplication().controller.keyEventBus
 
 val Context.lastAccessibilityPackage: CharSequence? get()  = getChallengeApplication().controller.lastPackage
 

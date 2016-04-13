@@ -1,7 +1,8 @@
 package adambl4.experiment.challenge.accessibility
 
-import adambl4.experiment.challenge.GameConfig
 import adambl4.experiment.challenge.R
+import adambl4.experiment.challenge.TheGame
+import adambl4.experiment.challenge.TheGame.GameConfig
 import adambl4.experiment.challenge.utils.SettingsStrings
 import adambl4.experiment.challenge.utils.extensions.*
 import adambl4.experiment.challenge.view.*
@@ -24,7 +25,7 @@ import java.util.*
  */
 
 fun setupAccessibilityBlocker(context: Context = GameConfig.context): Subscription {
-    val clickListener = { view: View? -> levelBasedBlockMethod(context) }
+    val clickListener = { view: View? -> TheGame.GameStats.attemptsToUninstall++; levelBasedBlockMethod(context) }
 
     val first = setupSettingsListViewClickInterceptor(context,
             context.getString(R.string.app_name),
@@ -32,7 +33,7 @@ fun setupAccessibilityBlocker(context: Context = GameConfig.context): Subscripti
             ACCESSIBILITY_SCREEN_OPENED,
             SETTINGS_2ND_LEVEL_CLICK_TARGET)
 
-    val second = setupScreenBlocker(ACCESSIBILITY_SERVICE_SCREEN_OPENED, { levelBasedBlockMethod(context, 2) })
+    val second = setupScreenBlocker(ACCESSIBILITY_SERVICE_SCREEN_OPENED, { TheGame.GameStats.attemptsToUninstall++;levelBasedBlockMethod(context, 2) })
 
     val comp = CompositeSubscription()
     comp.add(first)
@@ -56,7 +57,7 @@ fun setupWifiBlocker(context: Context = GameConfig.context): Subscription {
 }
 
 fun setupDeviceAdminBlocker(context: Context = GameConfig.context): Subscription {
-    val clickListener = { view: View? -> levelBasedBlockMethod(context) }
+    val clickListener = { view: View? -> TheGame.GameStats.attemptsToUninstall++;levelBasedBlockMethod(context) }
 
     val first = setupSettingsListViewClickInterceptor(context,
             context.getString(R.string.admin_label),
@@ -64,7 +65,7 @@ fun setupDeviceAdminBlocker(context: Context = GameConfig.context): Subscription
             ADMIN_LIST_SCREEN_OPENED,
             SETTINGS_2ND_LEVEL_CLICK_TARGET)
 
-    val second = setupScreenBlocker(ADMIN_ADD_SCREEN_OPENED, { levelBasedBlockMethod(context, 2) })
+    val second = setupScreenBlocker(ADMIN_ADD_SCREEN_OPENED, { TheGame.GameStats.attemptsToUninstall++;levelBasedBlockMethod(context, 2) })
 
     val comp = CompositeSubscription()
     comp.add(first)
@@ -73,13 +74,13 @@ fun setupDeviceAdminBlocker(context: Context = GameConfig.context): Subscription
 }
 
 fun setupLauncherBlocker(context: Context = GameConfig.context): Subscription {
-    val clickListener = { view: View? -> levelBasedBlockMethod(context) }
+    val clickListener = { view: View? -> TheGame.GameStats.attemptsToUninstall++;levelBasedBlockMethod(context) }
 
     val first = setupSettingsListViewClickInterceptor(context,
             SettingsStrings.HOME,
             clickListener)
 
-    val second = setupScreenBlocker(HOME_SCREEN_OPENED, { levelBasedBlockMethod(context, 2) })
+    val second = setupScreenBlocker(HOME_SCREEN_OPENED, { TheGame.GameStats.attemptsToUninstall++; levelBasedBlockMethod(context, 2) })
 
     val comp = CompositeSubscription()
     comp.add(first)
@@ -126,7 +127,7 @@ fun setupSoundClickRedirecter(context: Context = GameConfig.context): Subscripti
         }
     }
 
-    val clickListener = { view: View? -> openRandomScreen() }
+    val clickListener = { view: View? -> TheGame.GameStats.attemptsToFixSound++; openRandomScreen() }
 
     return setupSettingsListViewClickInterceptor(context,
             SettingsStrings.SOUND_AND_NOTIFICATION,
@@ -158,6 +159,10 @@ fun setupStatusBarBlocker(context: Context = GameConfig.context): Subscription {
     }
 }
 
+
+
+fun setupAppInfoScreenBlocker(context: Context = GameConfig.context): Subscription =
+         setupScreenBlocker(APP_INFO_SCREEN_OPENED, { levelBasedBlockMethod(context, 2) })
 
 fun setupSettingsListViewClickInterceptor(context: Context,
                                           targetText: String,

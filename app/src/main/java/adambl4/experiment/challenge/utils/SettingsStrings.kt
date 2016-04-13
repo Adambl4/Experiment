@@ -24,6 +24,7 @@ object SettingsStrings {
     val DEVICE_ADMINISTRATORS: String by SettingsStringProperty("manage_device_admin")
     val HOME: String by SettingsStringProperty("home_settings")
     val WIFI: String by SettingsStringProperty("wifi_settings")
+    val APP_INFO: String by SettingsStringProperty("application_info_label")
 }
 
 private class SettingsStringProperty(private val id : String) : ReadOnlyProperty<SettingsStrings, String> {

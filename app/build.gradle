@@ -38,13 +38,10 @@ dependencies {
     compile 'com.google.code.gson:gson:2.6.2'
     compile 'com.github.orhanobut:logger:1.12'
 
-    compile 'org.jetbrains.anko:anko-sdk23:0.8.3' // sdk19, sdk21, sdk23 are also available
-
-
-
-
-
+    compile 'org.jetbrains.anko:anko-sdk23:0.8.3'
+    compile 'com.jakewharton.timber:timber:4.1.2'
 }
+
 buildscript {
     ext.kotlin_version = '1.0.1-2'
     repositories {

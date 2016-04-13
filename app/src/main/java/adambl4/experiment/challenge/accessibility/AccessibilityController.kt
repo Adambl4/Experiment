@@ -2,9 +2,9 @@ package adambl4.experiment.challenge.accessibility
 
 import adambl4.experiment.challenge.BuildConfig
 import adambl4.experiment.challenge.utils.extensions.getChallengeApplication
+import adambl4.experiment.challenge.utils.ti
 import android.accessibilityservice.AccessibilityService
 import android.content.Context
-import android.util.Log
 import android.view.KeyEvent
 import android.view.KeyEvent.*
 import android.view.accessibility.AccessibilityEvent
@@ -20,18 +20,23 @@ import rx.subjects.PublishSubject
 
 class AccessibilityController {
     var lastPackage: CharSequence? = null
+    val blockedKeys = mutableSetOf<Int>()
+    var isAllBlocked = false
+
 
     enum class STATE {CONNECTED, DISCONNECTED }
 
-    private val accessibilityEventBus: PublishSubject<AccessibilityEvent>
-    private val accessibilityStateBus: PublishSubject<STATE>
+    private val accessibilityEventSubject: PublishSubject<AccessibilityEvent>
+    private val keyEventSubject: PublishSubject<KeyEvent>
+    private val accessibilityStateSubject: PublishSubject<STATE>
 
     private val eventToJson = AccessibilityToJsonConverter()
     var accessibilityService: AccessibilityService? = null
 
     init {
-        accessibilityEventBus = PublishSubject.create<AccessibilityEvent>()
-        accessibilityStateBus = PublishSubject.create<STATE>()
+        accessibilityEventSubject = PublishSubject.create<AccessibilityEvent>()
+        accessibilityStateSubject = PublishSubject.create<STATE>()
+        keyEventSubject = PublishSubject.create<KeyEvent>()
 
         if (BuildConfig.DEBUG) setLogs()
 
@@ -47,19 +52,23 @@ class AccessibilityController {
     }
 
     fun onEvent(event: AccessibilityEvent) {
-        accessibilityEventBus.onNext(event)
+        accessibilityEventSubject.onNext(event)
     }
 
     fun setState(state: STATE) {
-        accessibilityStateBus.onNext(state)
+        accessibilityStateSubject.onNext(state)
     }
 
 
     val eventBus: Observable<AccessibilityEvent>
-        get() = accessibilityEventBus.asObservable()
+        get() = accessibilityEventSubject.asObservable()
+
+    val keyEventBus: Observable<KeyEvent>
+        get() = keyEventSubject.asObservable()
+
 
     val stateBus: Observable<STATE>
-        get() = accessibilityStateBus.asObservable()
+        get() = accessibilityStateSubject.asObservable()
 
     fun getRootInActiveWindow(): AccessibilityNodeInfo? {
         val root = accessibilityService!!.rootInActiveWindow
@@ -71,12 +80,11 @@ class AccessibilityController {
         //Logger.json(eventToJson.getJsonString(root))
     }
 
-    val blockedKeys = mutableSetOf<Int>()
-    var isAllBlocked = false
     fun onKeyEvent(event: KeyEvent): Boolean {
-        Log.d("tag", "keyEvent $event")
+        keyEventSubject.onNext(event)
         return isAllBlocked || blockedKeys.contains(event.keyCode)
     }
+
 }
 
 fun Context.blockKey(keycode: Int) {
@@ -100,16 +108,30 @@ val mainHardwareButtons = arrayOf(
         KEYCODE_HOME, KEYCODE_BACK, KEYCODE_APP_SWITCH, KEYCODE_VOLUME_UP,
         KEYCODE_VOLUME_DOWN, KEYCODE_MUTE, KEYCODE_POWER)
 
-fun Context.blockMainHardwareButtons() {
+fun Context.blockHardwareButtons() {
     val cont = getChallengeApplication().controller;
     mainHardwareButtons.forEach {
         cont.blockedKeys.add(it)
     }
+    ti { "block hardware buttons" }
 }
 
-fun Context.unblockMainHardwareButtons() {
+fun Context.unblockHardwareButtons() {
     val cont = getChallengeApplication().controller;
     mainHardwareButtons.forEach {
         cont.blockedKeys.remove(it)
     }
+    ti { "unblock hardware buttons" }
+}
+
+fun Context.setVolumeKeysBlocked(isBlocked: Boolean) {
+    val cont = getChallengeApplication().controller;
+    if (isBlocked) {
+        cont.blockedKeys.add(KEYCODE_VOLUME_UP)
+        cont.blockedKeys.add(KEYCODE_VOLUME_DOWN)
+    } else {
+        cont.blockedKeys.remove(KEYCODE_VOLUME_UP)
+        cont.blockedKeys.remove(KEYCODE_VOLUME_DOWN)
+    }
+    ti { "set volume up button disabled $isBlocked" }
 }

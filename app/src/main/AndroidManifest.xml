@@ -3,8 +3,7 @@
           xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application
         android:name=".ChallengeApplication"
@@ -13,9 +12,10 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".view.MainActivity">
+        <activity android:name=".view.MainActivity" android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
+
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
@@ -40,6 +40,10 @@
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService"/>
+
+                <category android:name="android.accessibilityservice.category.FEEDBACK_AUDIBLE"/>
+                <category android:name="android.accessibilityservice.category.EEDBACK_HAPTIC"/>
+                <category android:name="android.accessibilityservice.category.FEEDBACK_SPOKEN"/>
             </intent-filter>
 
             <meta-data
@@ -52,16 +56,19 @@
             android:exported="false">
         </service>
 
-        <activity android:name=".view.LauncherActivity"
-                  android:enabled="false"
-                  android:label="@string/launcher_label">
+        <activity
+            android:name=".view.LauncherActivity"
+            android:enabled="true"
+            android:label="@string/launcher_label">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
+
                 <category android:name="android.intent.category.HOME"/>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
+        <activity android:name=".view.DeviceIsNotSupported">
+        </activity>
     </application>
 
 </manifest>
-

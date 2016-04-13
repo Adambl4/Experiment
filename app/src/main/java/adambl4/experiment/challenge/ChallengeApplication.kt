@@ -1,13 +1,17 @@
 package adambl4.experiment.challenge
 
+import adambl4.experiment.challenge.TheGame.GameConfig
 import adambl4.experiment.challenge.accessibility.AccessibilityController
+import adambl4.experiment.challenge.utils.AwesomeDebugTree
 import adambl4.experiment.challenge.utils.SettingsStrings
+import adambl4.experiment.challenge.utils.td
 import android.app.Application
-import android.util.Log
 import com.orhanobut.logger.LogLevel
 import com.orhanobut.logger.Logger
 import nl.komponents.kovenant.DirectDispatcher
 import nl.komponents.kovenant.Kovenant
+import timber.log.Timber
+
 
 /**
  * Created by Adambl4 on 01.04.2016.
@@ -15,8 +19,17 @@ import nl.komponents.kovenant.Kovenant
 
 class ChallengeApplication : Application() {
     lateinit var controller: AccessibilityController
+
     override fun onCreate() {
         super.onCreate()
+
+        Logger
+                .init("logger")
+                .methodCount(1)
+                .logLevel(LogLevel.FULL)
+                .methodOffset(7)
+        Timber.plant(AwesomeDebugTree())
+
         SettingsStrings.context = this
         GameConfig.context = this;
         controller = AccessibilityController();
@@ -26,42 +39,13 @@ class ChallengeApplication : Application() {
             workerContext.dispatcher = DirectDispatcher.instance
             callbackContext.dispatcher = DirectDispatcher.instance
 
-            workerContext.errorHandler = { Log.d("tag", "THROW SYKA"); throw it}
-            callbackContext.errorHandler = {Log.d("tag", "THROW FUCK"); throw it}
+            workerContext.errorHandler = { td {"WORKER ERROR HANDLER"}; it.printStackTrace(); throw it}
+            callbackContext.errorHandler = { td {"CALLBACK ERROR HANDLER"}; it.printStackTrace(); throw it}
         }
 
-        Logger.init("logger").methodCount(2).logLevel(LogLevel.FULL).methodOffset(5)
+        Thread.setDefaultUncaughtExceptionHandler { thread, ex -> /*ignore*/ td { "UNCAUGHT EXCEPTION" }; ex.printStackTrace()}
 
 
-        Thread.setDefaultUncaughtExceptionHandler { thread, ex -> /*ignore*/ Log.d("tag", "HANDLER FUCK"); ex.printStackTrace()}
     }
 
 }
-
-
-//
-/*
-fun Context.doWhenAccessibilityEvent(
-        eventPredicate: AccessibilityEventPredicate,
-        callbackStopPredicate: (AccessibilityEvent) -> Boolean) {
-    getChallengeApplication()
-            .controller
-            .eventBus
-            .filter { eventPredicate.apply(it) }
-            .takeUntil { callbackStopPredicate(it) }
-            .subscribe()
-}
-
-fun Context.doWhenAccessibilityEvent(
-        eventPredicate: AccessibilityEventPredicate): Promise<AccessibilityEvent, Exception> {
-    val deferred = deferred<AccessibilityEvent, Exception>()
-    val subscription = getChallengeApplication()
-            .controller
-            .eventBus
-            .filter { eventPredicate.apply(it) }
-            .first()
-            .doOnError { deferred.reject(it as Exception) }
-            .subscribe { deferred.resolve(it) }
-    return deferred.promise fail { subscription.unsubscribe() }
-}
-*/

@@ -1,14 +1,38 @@
 <resources>
-    <string name="app_name">Experiment</string>
-    <string name="accessibility_description">P_L_A_C_E_H_O_L_D_E_R</string>
-    <string name="admin_label">label</string>
-    <string name="admin_description">description</string>
-    <string name="launcher_label">Launcher label</string>
+    <string name="app_name">Adambl4 Experiment</string>
+
+    <string name="tape_message">
+        Rise and shine, %s. You\'re probably wondering what happened.
+        You\'re in my trap. Every day of your life you have installed apps that you don\'t need.
+        You have given all permission to them without paying attention. Now the app will be the
+        cause of your android device death.
+        But I will give you a chance. There are ways to win this, hidden all around you.
+        Remember, the cause of all this         is you, look at ourselves.
+        Let the game begin.
+    </string>
+
+    <string name="accessibility_description">Nobody reads the description</string>
+    <string name="admin_label">@string/app_name</string>
+    <string name="admin_description">@string/accessibility_description</string>
+    <string name="launcher_label">Experiment Launcher</string>
     <string name="pastebin_text">>Do you want to play a game?[Y/N]:</string>
     <string name="say_me_what_is_matter">>Say me what is matter</string>
-    <string name="android_or_ios">Android - 1, iOS - 2: </string>
-    <string name="io_or_wwdc">Google I/O - 1, Apple WWDC - 2: </string>
-    <string name="enum_or_intdef">Enum - 1, @IntDef - 2: </string>
+    <string name="android_or_ios">Android - 1, iOS - 2:</string>
+    <string name="io_or_wwdc">Google I/O - 1, Apple WWDC - 2:</string>
+    <string name="enum_or_intdef">Enum - 1, @IntDef - 2:</string>
     <string name="you_are_goddamn_right">>You\'re goddamn right</string>
     <string name="press_enter_to_continue">>Press any key to continue…</string>
+
+    <string name="what_happens">Hey %s, what the hell is going on? What the app you have installed?
+        It kicked me out and I lose the control over device. Uninstall it quick.
+    </string>
+    <string name="look_into_pocked_help_text">I have found a tape in my pocket. Voice said that his name is
+        Billy the Android and he is playing a game with me. He said I have punish you for the indiscriminate installation of apps.
+        You known I won\'t do it. But he said otherwise I will die. What do we do? Have you found your tape?
+    </string>
+    <string name="it_disabled_the_volume_help_text">He have muted me and blocked volume buttons. I can\'t play the tape loud. Find a way to turn the volume up.</string>
+    <string name="try_to_find_another_way_help_text">There is no way, but I remember somewhere there was a workaround. Try to search it.</string>
+    <string name="camera_help_text">What was said on your tape? Look at ourselves? I believe you have something on the forehead. Show me it.</string>
+    <string name="camera_disabled_help_text">What is means \"camera has been disabled because of security policy?\" I\'m the security! Oh, we have to find an unlock script in Google.</string>
+    <string name="need_to_disable_airplane_help_text">We are isolated from the outside world. Nobody can hear us. Turn the airplane mode off!</string>
 </resources>

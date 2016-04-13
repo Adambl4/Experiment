@@ -1,8 +1,7 @@
 package adambl4.experiment.challenge.accessibility
 
-import adambl4.experiment.challenge.GameConfig
 import adambl4.experiment.challenge.R
-import adambl4.experiment.challenge.accessibility.*
+import adambl4.experiment.challenge.TheGame.GameConfig
 import adambl4.experiment.challenge.utils.*
 import adambl4.experiment.challenge.utils.extensions.*
 import adambl4.experiment.challenge.view.LauncherActivity
@@ -24,8 +23,10 @@ import org.jetbrains.anko.audioManager
 fun enableAirplaneModeIfNeeded(context: Context = GameConfig.context): Promise<Unit, Exception> =
         if (!isAirplaneModeEnabled(context))
             toggleAirPlaneMode(context);
-        else
+        else {
+            ti { "Airplane mode already enabled" }
             Promise.ofSuccess(Unit)
+        }
 
 fun enableDeviceAdminIfNeeded(context: Context = GameConfig.context): Promise<Unit, Exception> =
         if (!isDeviceAdministrationEnabled())
@@ -39,6 +40,7 @@ fun becomeLauncherIfNeeded(context: Context = GameConfig.context): Promise<Unit,
     if (!isTheAppIsLauncher()) {
         return setTheAppAsLauncher(context)
     } else {
+        ti { "The app is already launcher" }
         return Promise.ofSuccess(Unit)
     }
 }
@@ -47,6 +49,7 @@ fun muteIfNeeded(context: Context = GameConfig.context): Promise<Unit, Exception
     if (context.audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) != 0) {
         return mute(context)
     } else {
+        ti { "Sound is already muted" }
         return Promise.ofSuccess(Unit)
     }
 }
@@ -54,29 +57,34 @@ fun muteIfNeeded(context: Context = GameConfig.context): Promise<Unit, Exception
 
 fun toggleAirPlaneMode(context: Context = GameConfig.context): Promise<Unit, Exception> {
     return task {
+        ti { "Toggle airplane mode" }
         context.startActivity(INTENT_AIRPLANE_MODE)
-        waitEvent(AIRPLANE_SCREEN_OPENED)
+        waitAccessibilityEvent(AIRPLANE_SCREEN_OPENED)
     }.unwrapAndThen {
+        ti { "Airplane screen opened" }
         doAccessibilityManipulation { toggleAirplaneManipulation(it) }
     }.toSuccessVoid()
 }
 
 fun toggleDeviceAdministration(context: Context = GameConfig.activityContext): Promise<Unit, Exception> {
     if (context !is Activity) throw IllegalArgumentException("Context should be an activity")
-
     return task {
+        ti { "Enable device administration" }
         context.startActivity(INTENT_DEVICE_ADMINISTRATION())
-        waitEvent(ADMIN_ADD_SCREEN_OPENED)
+        waitAccessibilityEvent(ADMIN_ADD_SCREEN_OPENED)
     }.unwrapAndThen {
+        ti { "Device admin screen opened" }
         doAccessibilityManipulation { toggleDeviceAdminManipulation(it) }
     }.toSuccessVoid()
 }
 
 fun setTheAppAsLauncher(context: Context = GameConfig.context): Promise<Unit, Exception> {
     return task {
+        ti { "Setup the app as launcher" }
         context.startActivity(INTENT_HOME)
-        waitEvent(HOME_SCREEN_OPENED)
+        waitAccessibilityEvent(HOME_SCREEN_OPENED)
     }.unwrapAndThen {
+        ti { "Home screen is opened" }
         doAccessibilityManipulation { chooseLauncherManipulation(it, context.resources.getString(R.string.launcher_label)) }
     }.toSuccessVoid()
 }
@@ -86,21 +94,25 @@ fun disableAutoRotateIfNeeded(context: Context = GameConfig.context): Promise<Un
         if (isAutoRotateEnabled(context)) {
             toggleAutoRotate()
         } else {
+            ti { "Auto rotate is already disabled" }
             Promise.ofSuccess(Unit)
         }
 
 fun mute(context: Context = GameConfig.context): Promise<Unit, Exception> =
         task {
+            ti { "Mute the sound" }
             context.startActivity(INTENT_SOUND)
-            waitEvent(SOUND_SCREEN_OPENED)
+            waitAccessibilityEvent(SOUND_SCREEN_OPENED)
         }.unwrapAndThen {
+            ti { "Sound screen opened" }
             doAccessibilityManipulation { setMediaVolumeSeekBarPositionManipulation(it, 0) }
         }.toSuccessVoid()
 
 fun toggleAutoRotate(context: Context = GameConfig.context): Promise<Unit, Exception> =
         task {
+            ti { "Toggle auto rotate" }
             context.startActivity(INTENT_ACCESSIBILITY)
-            waitEvent(ACCESSIBILITY_SCREEN_OPENED)
+            waitAccessibilityEvent(ACCESSIBILITY_SCREEN_OPENED)
         }.unwrapAndThen {
             val listview = it.source.findOneByIdOrThrow("android:id/list")
             listview.performScrollForward(500)

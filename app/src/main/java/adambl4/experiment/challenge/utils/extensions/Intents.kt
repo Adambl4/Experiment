@@ -1,6 +1,6 @@
 package adambl4.experiment.challenge.utils.extensions
 
-import adambl4.experiment.challenge.GameConfig
+import adambl4.experiment.challenge.TheGame.GameConfig
 import adambl4.experiment.challenge.utils.adminReceiverComponentName
 import android.app.admin.DevicePolicyManager
 import android.content.Context
